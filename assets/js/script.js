@@ -1,3 +1,4 @@
+// pulls weather information for particular area using lattitude and longitude coordinates, grabs our weather data
 var getWeather = function (lon, lat, name) {
     var apiUrl = `https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lon}&exclude=minutely,hourly&appid=840b68ab7f22c971cd6b63d53b3d68b4&units=imperial`;
 
@@ -14,15 +15,15 @@ var getWeather = function (lon, lat, name) {
         }
     })
 };
-
-var getLatAndLon = function (city) {
+//  required to get lat, lon, for above api call
+var getCoords = function (city) {
     var apiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=840b68ab7f22c971cd6b63d53b3d68b4&units=imperial`;
 
     fetch(apiUrl).then(function (response) {
         if (response.ok) {
             response.json().then(function (data) {
                 getWeather(data.coord.lon, data.coord.lat, data.name);
-                getAndSaveHistory(city);
+                getSaveHistory(city);
             })
         }
         else {
@@ -31,7 +32,7 @@ var getLatAndLon = function (city) {
     })
 };
 
-
+// uses weather api call to create html
 var displayWeather = function (weather, name) {
     var currentDayWeatherEl = document.querySelector(".currentDayWeather");
 
@@ -51,29 +52,24 @@ var displayWeather = function (weather, name) {
     indexUVColor(weather);
 };
 
-
+// changes UV color based on UV number
 var indexUVColor = function (weather) {
     var indexUV = weather.current.uvi;
     var indexUVEl = $(".index-uv");
 
-    if (indexUV <= 2) {
-        indexUVEl.css("background-color", "green");
-    }
-    else if (indexUV <= 5) {
-        indexUVEl.css("background-color", "yellow");
-    }
-    else if (indexUV <= 7) {
-        indexUVEl.css("background-color", "orange");
-    }
-    else if (indexUV <= 10) {
-        indexUVEl.css("background-color", "red");
-    }
-    else {
-        indexUVEl.css("background-color", "purple");
+    switch (true) {
+        case (indexUV <= 2): indexUVEl.css("background-color", "green")
+            break;
+        case (indexUV <=5): indexUVEl.css("background-color", "yellow")
+            break;
+        case (indexUV <=7): indexUVEl.css("background-color", "orange")
+            break;
+        case (indexUV >7): indexUVEl.css("background-color", "red")
+            break;
     }
 }
 
-
+// for loop for future day forecast
 var displayForcast = function (weather) {
     var forcast = $(".forcast");
     var date = moment();
@@ -82,6 +78,7 @@ var displayForcast = function (weather) {
         date.add(1, 'days');
 
         forcast.children('li').eq(i - 1).html(`
+            <div class="col-md-2"
             <h4>${date.format('l')}</h4>
             <div><img src="http://openweathermap.org/img/wn/${weather.daily[i].weather[0].icon}@2x.png" alt="Sky"></div>
             <div>Temp: ${weather.daily[i].temp.day}\u00B0F</div>
@@ -91,19 +88,19 @@ var displayForcast = function (weather) {
     }
 }
 
-
+// retieves input on button submission
 var getInput = function (event) {
     event.preventDefault();
 
     cityInput = $(".cityInput").val();
     if (cityInput) {
-        getLatAndLon(cityInput);
+        getCoords(cityInput);
         $(".cityInput").val('');
     }
 };
 
-
-var getAndSaveHistory = function (cityInput) {
+// Sets local storage, if none creates it, limits to 4 held
+var getSaveHistory = function (cityInput) {
     cityInputList = localStorage.getItem('key');
 
     if (!cityInput && cityInputList) {
@@ -120,8 +117,8 @@ var getAndSaveHistory = function (cityInput) {
     }
 
     if (cityInputList) {
-        if (cityInputList.length > 8) {
-            cityInputList.splice(8);
+        if (cityInputList.length > 4) {
+            cityInputList.splice(4);
         }
 
         localStorage.setItem('key', JSON.stringify(cityInputList));
@@ -131,7 +128,7 @@ var getAndSaveHistory = function (cityInput) {
     }
 };
 
-
+// Shows previous searches in left side
 var displayHistory = function (cityInputList) {
     var historyItem = $(".history");
     for (var i = 0; i < cityInputList.length; i++) {
@@ -140,19 +137,21 @@ var displayHistory = function (cityInputList) {
     }
 };
 
-
+// Inputs history info into getCords()
 var clickHistory = function (event) {
     var city = $(event.target);
 
     if (city.is('li')) {
-        getLatAndLon(city.html());
+        getCoords(city.html());
     }
 };
 
-
+// Array holding our history
 var cityInputList = [];
 
-getLatAndLon('Amsterdam');
+// startup showing city
+getCoords('Amsterdam');
 
+// used actions
 $("form").on("submit", getInput);
 $(".history").on("click", clickHistory);
