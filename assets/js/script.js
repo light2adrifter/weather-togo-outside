@@ -34,9 +34,9 @@ var getCoords = function (city) {
 
 // uses weather api call to create html
 var displayWeather = function (weather, name) {
-    var currentDayWeatherEl = document.querySelector(".currentDayWeather");
+    var currentWeatherEl = document.querySelector(".currentWeather");
 
-    currentDayWeatherEl.innerHTML = `
+    currentWeatherEl.innerHTML = `
         <h2>
             <span>${name} ${moment().format('l')}</span>
             <img src="http://openweathermap.org/img/wn/${weather.current.weather[0].icon}@2x.png" alt="Sky">
@@ -58,13 +58,13 @@ var indexUVColor = function (weather) {
     var indexUVEl = $(".index-uv");
 
     switch (true) {
-        case (indexUV <= 2): indexUVEl.css("background-color", "green")
+        case (indexUV <= 2): indexUVEl.css("background-color", "rgba(0, 250, 0, .5)")
             break;
-        case (indexUV <=5): indexUVEl.css("background-color", "yellow")
+        case (indexUV <=5): indexUVEl.css("background-color", "rgba(250, 250, 0, 0.5)")
             break;
-        case (indexUV <=7): indexUVEl.css("background-color", "orange")
+        case (indexUV <=7): indexUVEl.css("background-color", "rgba(250, 100, 0, 0.5)")
             break;
-        case (indexUV >7): indexUVEl.css("background-color", "red")
+        case (indexUV >7): indexUVEl.css("background-color", "rgba(250, 0, 0, .5)")
             break;
     }
 }
@@ -78,7 +78,6 @@ var displayForcast = function (weather) {
         date.add(1, 'days');
 
         forcast.children('li').eq(i - 1).html(`
-            <div class="col-md-2"
             <h4>${date.format('l')}</h4>
             <div><img src="http://openweathermap.org/img/wn/${weather.daily[i].weather[0].icon}@2x.png" alt="Sky"></div>
             <div>Temp: ${weather.daily[i].temp.day}\u00B0F</div>
@@ -88,7 +87,7 @@ var displayForcast = function (weather) {
     }
 }
 
-// retieves input on button submission
+// retrieves input on button submission
 var getInput = function (event) {
     event.preventDefault();
 
@@ -99,7 +98,7 @@ var getInput = function (event) {
     }
 };
 
-// Sets local storage, if none creates it, limits to 4 held
+// Sets local storage, if none creates it, limits to 4 held 
 var getSaveHistory = function (cityInput) {
     cityInputList = localStorage.getItem('key');
 
@@ -128,7 +127,7 @@ var getSaveHistory = function (cityInput) {
     }
 };
 
-// Shows previous searches in left side
+// Shows previous searches on left side
 var displayHistory = function (cityInputList) {
     var historyItem = $(".history");
     for (var i = 0; i < cityInputList.length; i++) {
@@ -152,6 +151,6 @@ var cityInputList = [];
 // startup showing city
 getCoords('Amsterdam');
 
-// used actions
+// used actions for search submission and history selection.
 $("form").on("submit", getInput);
 $(".history").on("click", clickHistory);
